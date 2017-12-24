@@ -1,4 +1,4 @@
-FROM arm32v7/debian:wheezy
+FROM debian:wheezy
 
 MAINTAINER Charles Silva <suporte@charlessilva.com.br>
 
