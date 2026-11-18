@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: charlessilva/rpi-mysql:8.4
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      # Required: Set a strong root password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme}
+      # Optional: Create database and user on startup
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-appdb}
+      MYSQL_USER: ${MYSQL_USER:-appuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppass}
+    volumes:
+      # Persist data
+      - mysql-data:/var/lib/mysql
+      # Optional: Custom configuration
+      - ./config:/etc/mysql/conf.d
+    ports:
+      - "3306:3306"
+      - "33060:33060"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-changeme}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # Resource limits (adjust for your Raspberry Pi)
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+volumes:
+  mysql-data:
+    driver: local

@@ -1,29 +1,26 @@
-FROM debian:wheezy
+# Docker MySQL for Raspberry Pi (ARM64) - Updated to MySQL 8.4 LTS
+# Based on official MySQL image with ARM64 support
+# Minimal CVEs: Uses official image with regular security updates
 
-MAINTAINER Charles Silva <suporte@charlessilva.com.br>
+FROM mysql:8.4
 
-RUN groupadd -r mysql && useradd -r -g mysql mysql
+# Maintainer
+LABEL maintainer="Charles Silva <suporte@charlessilva.com.br>"
+LABEL description="MySQL 8.4 for Raspberry Pi (ARM64) - Official image with security updates"
+LABEL version="8.4"
 
-RUN apt-get update && apt-get install -y perl --no-install-recommends && rm -rf /var/lib/apt/lists/*
+# The official MySQL image already includes:
+# - Proper mysql user/group setup
+# - Secure default configuration
+# - Health checks
+# - Proper entrypoint with database initialization
+# - Support for MYSQL_ROOT_PASSWORD, MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD
+# - SSL/TLS support
+# - ARM64 architecture support
 
-ENV MYSQL_VERSION 5.5
+# Expose MySQL port
+EXPOSE 3306 33060
 
-RUN { \
-		echo mysql-server mysql-server/data-dir select ''; \
-		echo mysql-server mysql-server/root-pass password ''; \
-		echo mysql-server mysql-server/re-root-pass password ''; \
-		echo mysql-server mysql-server/remove-test-db select false; \
-	} | debconf-set-selections \
-	&& apt-get update && apt-get --fix-missing install -y mysql-server="${MYSQL_VERSION}"* && rm -rf /var/lib/apt/lists/* \
-	&& rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql && chown -R mysql:mysql /var/lib/mysql \
-        && apt-get clean
-
-RUN sed -Ei 's/^(bind-address|log)/#&/' /etc/mysql/my.cnf
-
-VOLUME /var/lib/mysql
-
-COPY entrypoint.sh /
-ENTRYPOINT ["/entrypoint.sh"]
-
-EXPOSE 3306
-CMD ["mysqld"]
+# Use official entrypoint and cmd
+# ENTRYPOINT ["docker-entrypoint.sh"]
+# CMD ["mysqld"]
